@@ -30,4 +30,8 @@ service GreetService{
 
   // Server Streaming 
   rpc GreetManyTimes(GreetManyTimesRequest) returns (stream GreetManyTimesResponse) {};
+
+  // Client streaming 
+
+  // rpc LongGreet(stream LongGreetRequest) returns (LongGreetResponse) {};
 }

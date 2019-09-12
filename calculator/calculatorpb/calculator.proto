@@ -12,6 +12,16 @@ message SumResponse {
   int32 sum_reult = 1;
 }
 
+message PrimeRequest {
+  int32 the_number = 1;
+}
+
+message PrimeResponse {
+  int32 prime_factor = 1;
+}
+
 service CalculatorService {
   rpc Sum(SumRequest) returns (SumResponse) {};
+
+  rpc PrimeNumber(PrimeRequest) returns (stream PrimeResponse) {};
 }

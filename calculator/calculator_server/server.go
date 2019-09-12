@@ -23,6 +23,23 @@ func (*server) Sum(ctx context.Context, req *calculatorpb.SumRequest) (*calculat
 	return res, nil
 }
 
+func (*server) PrimeNumber(req *calculatorpb.PrimeRequest, stream calculatorpb.CalculatorService_PrimeNumberServer) error {
+	fmt.Printf("Received Prime RPC: %v", req)
+	theNumber := req.GetTheNumber()
+	var n int32 = 2
+	for theNumber > 1 {
+		if theNumber%n == 0 {
+			stream.Send(&calculatorpb.PrimeResponse{
+				PrimeFactor: n,
+			})
+			theNumber = theNumber / n
+		} else {
+			n++
+		}
+	}
+	return nil
+}
+
 func main() {
 	fmt.Println("Calculator server")
 
