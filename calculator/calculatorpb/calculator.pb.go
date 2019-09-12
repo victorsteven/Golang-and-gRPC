@@ -6,11 +6,12 @@ package calculatorpb
 import (
 	context "context"
 	fmt "fmt"
+	math "math"
+
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -72,7 +73,7 @@ func (m *SumRequest) GetSecondNumber() int32 {
 }
 
 type SumResponse struct {
-	SumReult             int32    `protobuf:"varint,1,opt,name=sum_reult,json=sumReult,proto3" json:"sum_reult,omitempty"`
+	SumResult            int32    `protobuf:"varint,1,opt,name=sum_reult,json=sumResult,proto3" json:"sum_reult,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -103,9 +104,9 @@ func (m *SumResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SumResponse proto.InternalMessageInfo
 
-func (m *SumResponse) GetSumReult() int32 {
+func (m *SumResponse) GetSumResult() int32 {
 	if m != nil {
-		return m.SumReult
+		return m.SumResult
 	}
 	return 0
 }
