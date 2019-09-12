@@ -9,7 +9,7 @@ message SumRequest {
 }
 
 message SumResponse {
-  int32 sum_reult = 1;
+  int32 sum_result = 1;
 }
 
 message PrimeRequest {
@@ -20,8 +20,18 @@ message PrimeResponse {
   int32 prime_factor = 1;
 }
 
+message NumberRequest {
+  int64 number = 1;
+}
+
+message NumberResponse {
+  double average  = 1;
+}
+
 service CalculatorService {
   rpc Sum(SumRequest) returns (SumResponse) {};
 
   rpc PrimeNumber(PrimeRequest) returns (stream PrimeResponse) {};
+
+  rpc ComputeAverage(stream NumberRequest) returns (NumberResponse) {};
 }

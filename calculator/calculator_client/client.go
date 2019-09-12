@@ -22,7 +22,8 @@ func main() {
 	c := calculatorpb.NewCalculatorServiceClient(cc)
 
 	// doUnary(c)
-	doPrimeNumbers(c)
+	// doPrimeNumbers(c)
+	doAverage(c)
 
 	// fmt.Printf("Created client: %f", c)
 
@@ -61,4 +62,42 @@ func doPrimeNumbers(c calculatorpb.CalculatorServiceClient) {
 		}
 		fmt.Println(res.GetPrimeFactor())
 	}
+}
+
+func doAverage(c calculatorpb.CalculatorServiceClient) {
+	fmt.Println("Starting to do a Aveage Numbers RPC...")
+	// numbers := []*calculatorpb.NumberRequest{
+	// &calculatorpb.NumberRequest{
+	// 	Number: 5,
+	// },
+	// 	&calculatorpb.NumberRequest{
+	// 		Number: 10,
+	// 	},
+	// 	&calculatorpb.NumberRequest{
+	// 		Number: 15,
+	// 	},
+	// 	&calculatorpb.NumberRequest{
+	// 		Number: 14,
+	// 	},
+	// }
+
+	numbers := []int64{1, 23, 4, 5, 6}
+
+	stream, err := c.ComputeAverage(context.Background())
+	if err != nil {
+		log.Fatalf("Error while calling Average RPC: %v", err)
+	}
+
+	for _, number := range numbers {
+		fmt.Printf("Sending req: %v\n", number)
+		stream.Send(&calculatorpb.NumberRequest{
+			Number: number,
+		})
+	}
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("Error while receiving response %v", err)
+	}
+
+	fmt.Printf("The Average is: %v\n", res.GetAverage())
 }

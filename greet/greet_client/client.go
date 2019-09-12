@@ -95,7 +95,7 @@ func doClientStreaming(c greetpb.GreetServiceClient) {
 		},
 	}
 
-	// We dont need to pass the req, because it is a stream
+	// We dont need to pass the req, because it is a client stream
 	stream, err := c.LongGreet(context.Background())
 	if err != nil {
 		log.Fatalf("Error while calling LongGreet: %v", err)
