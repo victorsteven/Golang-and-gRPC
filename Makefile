@@ -7,6 +7,9 @@ greet_client:
 calculator_server:
 	go run calculator/calculator_server/server.go
 
+blog_server:
+	go run blog/blog_server/server.go
+
 calculator_client:
 	go run calculator/calculator_client/client.go
 
