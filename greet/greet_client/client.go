@@ -10,12 +10,27 @@ import (
 	"github.com/victorsteven/go-grpc/greet/greetpb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 )
 
 func main() {
 	fmt.Println("Hello client")
-	cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+
+	tls := true
+	opts := grpc.WithInsecure()
+	if tls {
+		certFile := "ssl/ca.crt" //Certificate Authority Trust Certificate
+		creds, sslErr := credentials.NewClientTLSFromFile(certFile, "")
+		if sslErr != nil {
+			log.Fatal("Error while loading CA trust certificates: %v", sslErr)
+			return
+		}
+		opts = grpc.WithTransportCredentials(creds)
+	}
+
+	cc, err := grpc.Dial("localhost:50051", opts)
+	// cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatal("could not connect: %v", err)
 	}
@@ -24,12 +39,12 @@ func main() {
 
 	c := greetpb.NewGreetServiceClient(cc)
 
-	// doUnary(c)
+	doUnary(c)
 	// doServerStreaming(c)
 	// doClientStreaming(c)
 	// doBiDiStreaming(c)
-	doUnaryWithDeadline(c, 5*time.Second) //This should complete
-	doUnaryWithDeadline(c, 1*time.Second) //This should timeout
+	// doUnaryWithDeadline(c, 5*time.Second) //This should complete
+	// doUnaryWithDeadline(c, 1*time.Second) //This should timeout
 
 	// fmt.Printf("Created client: %f", c)
 
