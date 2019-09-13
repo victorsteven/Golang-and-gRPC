@@ -35,7 +35,7 @@ func doUnary(c calculatorpb.CalculatorServiceClient) {
 		FirstNumber:  5,
 		SecondNumber: 30,
 	}
-	// c.Greet(context.Background(), in *greetpb.GreetRequest, opts ...grpc.CallOption)
+
 	res, err := c.Sum(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error while calling Sum RPC: %v", err)
