@@ -70,7 +70,7 @@ func (*server) CreateBlog(ctx context.Context, req *blogpb.CreateBlogRequest) (*
 func (*server) ReadBlog(ctx context.Context, req *blogpb.ReadBlogRequest) (*blogpb.ReadBlogResponse, error) {
 	fmt.Println("Read blog request")
 	blogID := req.GetBlogId()
-	old, err := primitive.ObjectIDFromHex(blogID)
+	oid, err := primitive.ObjectIDFromHex(blogID)
 	if err != nil {
 		return nil, status.Errorf(
 			codes.InvalidArgument,
@@ -79,9 +79,7 @@ func (*server) ReadBlog(ctx context.Context, req *blogpb.ReadBlogRequest) (*blog
 	}
 	// create am empty struct
 	data := &blogItem{}
-	// filter := bson.NewDocument(bson.EC.ObjectID("_id", old))
-
-	filter := bson.M{"_id": old}
+	filter := bson.M{"_id": oid}
 
 	res := collection.FindOne(context.Background(), filter)
 	if err := res.Decode(data); err != nil {
@@ -92,13 +90,84 @@ func (*server) ReadBlog(ctx context.Context, req *blogpb.ReadBlogRequest) (*blog
 	}
 
 	return &blogpb.ReadBlogResponse{
-		Blog: &blogpb.Blog{
-			Id:       data.ID.Hex(), //convert to string
-			AuthorId: data.AuthorID,
-			Content:  data.Content,
-			Title:    data.Title,
-		},
+		Blog: dataToBlogPb(data),
 	}, nil
+}
+
+func dataToBlogPb(data *blogItem) *blogpb.Blog {
+	return &blogpb.Blog{
+		Id:       data.ID.Hex(), //convert to string
+		AuthorId: data.AuthorID,
+		Content:  data.Content,
+		Title:    data.Title,
+	}
+}
+
+func (*server) UpdateBlog(ctx context.Context, req *blogpb.UpdateBlogRequest) (*blogpb.UpdateBlogResponse, error) {
+	fmt.Println("update blog request")
+	blog := req.GetBlog()
+	oid, err := primitive.ObjectIDFromHex(blog.GetId())
+	if err != nil {
+		return nil, status.Errorf(
+			codes.InvalidArgument,
+			fmt.Sprintf("Cannot pass ID"),
+		)
+	}
+	// create am empty struct
+	data := &blogItem{}
+	filter := bson.M{"_id": oid}
+
+	res := collection.FindOne(context.Background(), filter)
+	if err := res.Decode(data); err != nil {
+		return nil, status.Errorf(
+			codes.NotFound,
+			fmt.Sprintf("Cannot find blog with specified ID: ", err),
+		)
+	}
+	// We update our internal struct
+	data.AuthorID = blog.GetAuthorId()
+	data.Content = blog.GetContent()
+	data.Title = blog.GetTitle()
+
+	_, updateErr := collection.ReplaceOne(context.Background(), filter, data)
+	if updateErr != nil {
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Cannot update object %v", updateErr),
+		)
+	}
+	return &blogpb.UpdateBlogResponse{
+		Blog: dataToBlogPb(data),
+	}, nil
+}
+
+func (*server) DeleteBlog(ctx context.Context, req *blogpb.DeleteBlogRequest) (*blogpb.DeleteBlogResponse, error) {
+	// blog := req.GetBlogId()
+	fmt.Println("Deleting a blog")
+	oid, err := primitive.ObjectIDFromHex(req.GetBlogId())
+	if err != nil {
+		return nil, status.Errorf(
+			codes.InvalidArgument,
+			fmt.Sprintf("Cannot pass ID"),
+		)
+	}
+	filter := bson.M{"_id": oid}
+	res, err := collection.DeleteOne(context.Background(), filter)
+
+	if err != nil {
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Cannot delete object %v", err),
+		)
+	}
+
+	if res.DeletedCount == 0 {
+		return nil, status.Errorf(
+			codes.NotFound,
+			fmt.Sprintf("Cannot find blog in MongoDB: %v", err),
+		)
+	}
+	return &blogpb.DeleteBlogResponse{BlogId: req.GetBlogId()}, nil
 }
 
 func main() {
