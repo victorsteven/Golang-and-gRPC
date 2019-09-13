@@ -9,3 +9,9 @@ calculator_server:
 
 calculator_client:
 	go run calculator/calculator_client/client.go
+
+calculator:
+	protoc calculator/calculatorpb/calculator.proto --go_out=plugins=grpc:.
+
+greet:
+	protoc greet/greetpb/greet.proto --go_out=plugins=grpc:.

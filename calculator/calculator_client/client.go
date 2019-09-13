@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"github.com/victorsteven/go-grpc/calculator/calculatorpb"
 	"google.golang.org/grpc"
@@ -23,7 +24,8 @@ func main() {
 
 	// doUnary(c)
 	// doPrimeNumbers(c)
-	doAverage(c)
+	// doAverage(c)
+	doMaximum(c)
 
 	// fmt.Printf("Created client: %f", c)
 
@@ -100,4 +102,51 @@ func doAverage(c calculatorpb.CalculatorServiceClient) {
 	}
 
 	fmt.Printf("The Average is: %v\n", res.GetAverage())
+}
+
+func doMaximum(c calculatorpb.CalculatorServiceClient) {
+	fmt.Println("Starting to do a Maximum Numbers RPC...")
+
+	stream, err := c.FindMaximum(context.Background())
+	if err != nil {
+		log.Fatalf("Error while calling FindMaximum RPC: %v", err)
+	}
+
+	waitc := make(chan struct{})
+
+	// send go routine
+	go func() {
+		// numbers := []int32{1, 5, 3, 9, 8, 2}
+		numbers := []int32{4, 7, 2, 19, 4, 6, 32}
+
+		for _, number := range numbers {
+			fmt.Printf("Sending req: %v\n", number)
+			stream.Send(&calculatorpb.FindMaximumRequest{
+				Number: number,
+			})
+			time.Sleep(1000 * time.Millisecond)
+		}
+		err = stream.CloseSend()
+		if err != nil {
+			log.Fatalf("Error while sending response %v", err)
+		}
+	}()
+
+	// Receive go routine
+	go func() {
+		for {
+			res, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Fatalf("problem while reading server stream: %v", err)
+				break
+			}
+			maximum := res.GetMaximum()
+			fmt.Printf("Received a maximum of: %v\n", maximum)
+		}
+		close(waitc)
+	}()
+	<-waitc
 }

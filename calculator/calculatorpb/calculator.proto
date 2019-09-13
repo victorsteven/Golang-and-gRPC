@@ -28,10 +28,20 @@ message NumberResponse {
   double average  = 1;
 }
 
+message FindMaximumRequest { 
+  int32 number = 1;
+}
+
+message FindMaximumResponse {
+  int32 maximum = 1;
+}
+
 service CalculatorService {
   rpc Sum(SumRequest) returns (SumResponse) {};
 
   rpc PrimeNumber(PrimeRequest) returns (stream PrimeResponse) {};
 
   rpc ComputeAverage(stream NumberRequest) returns (NumberResponse) {};
+
+  rpc FindMaximum(stream FindMaximumRequest) returns (stream FindMaximumResponse) {};
 }
